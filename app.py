@@ -4,10 +4,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import uuid
-from db_helper import (get_user, create_user, save_session, get_user_sessions, 
-                      update_user_profile, get_users_by_skill, save_booking, 
-                      get_user_bookings, save_rating, get_user_ratings, 
-                      check_availability_conflict)
+from db_helper_sql import (
+    db, get_user, create_user, save_session, get_user_sessions,
+    update_user_profile, get_users_by_skill, save_booking,
+    get_user_bookings, save_rating, get_user_ratings,
+    check_availability_conflict
+)
 from auth import login_required
 
 # Configure logging
@@ -15,6 +17,17 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
+
+# Configure SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///skillshare.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize the database
+db.init_app(app)
+
+# Create all database tables
+with app.app_context():
+    db.create_all()
 
 @app.route('/')
 def index():
@@ -246,31 +259,25 @@ def request_skill():
                 flash('Invalid date format', 'error')
                 return render_template('request.html', **form_data)
         
-        # Handle time ranges
+        # Handle time ranges (now optional)
         start_times = request.form.getlist('start_time')
         end_times = request.form.getlist('end_time')
         
-        if not start_times or not end_times:
-            flash('Please add at least one time range', 'error')
-            return render_template('request.html', **form_data)
-        
         time_ranges = []
-        for start, end in zip(start_times, end_times):
-            if not start or not end:
-                flash('Please fill in all time ranges', 'error')
-                return render_template('request.html', **form_data)
-            
-            # Validate time format and order
-            try:
-                start_time = datetime.strptime(start, '%H:%M').time()
-                end_time = datetime.strptime(end, '%H:%M').time()
-                if start_time >= end_time:
-                    flash('End time must be after start time', 'error')
-                    return render_template('request.html', **form_data)
-                time_ranges.append([start, end])
-            except ValueError:
-                flash('Invalid time format', 'error')
-                return render_template('request.html', **form_data)
+        # Only process time ranges if both start and end times are provided
+        if any(start_times) and any(end_times):
+            for start, end in zip(start_times, end_times):
+                if start and end:  # Only process if both start and end are provided
+                    try:
+                        start_time = datetime.strptime(start, '%H:%M').time()
+                        end_time = datetime.strptime(end, '%H:%M').time()
+                        if start_time >= end_time:
+                            flash('End time must be after start time', 'error')
+                            return render_template('request.html', **form_data)
+                        time_ranges.append([start, end])
+                    except ValueError:
+                        flash('Invalid time format', 'error')
+                        return render_template('request.html', **form_data)
         
         # Save request to database
         session_data = {
@@ -283,11 +290,16 @@ def request_skill():
             'timestamp': datetime.now().isoformat()
         }
         
-        session_id = save_session(session_data)
-        if session_id:
-            flash('Skill request submitted successfully!', 'success')
-            return redirect(url_for('profile'))
-        else:
+        try:
+            session_id = save_session(session_data)
+            if session_id:
+                flash('Skill request submitted successfully!', 'success')
+                return redirect(url_for('profile'))
+            else:
+                flash('Error saving request. Please try again.', 'error')
+                return render_template('request.html', **form_data)
+        except Exception as e:
+            logging.error(f"Error saving request: {e}")
             flash('Error saving request. Please try again.', 'error')
             return render_template('request.html', **form_data)
     
@@ -437,6 +449,12 @@ def find_teachers():
         # Remove current user from results
         current_user = session['username']
         teachers = [t for t in teachers if t['username'] != current_user]
+        
+        # Sort teachers by rating (highest first)
+        teachers.sort(key=lambda x: x.get('average_rating', 0), reverse=True)
+        
+        if not teachers:
+            flash('No teachers found for this skill. Try a different skill or check back later.', 'info')
         
         return render_template('find.html', 
                              skill=skill, 
