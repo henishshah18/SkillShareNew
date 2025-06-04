@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Rate Session - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i data-feather="star" style="width: 48px; height: 48px; color: var(--bs-warning);"></i>
+                    <h2 class="card-title mt-3">Rate Your Session</h2>
+                    <p class="text-muted">Share your experience to help the community</p>
+                </div>
+
+                <!-- Session Details -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title">Session Details</h6>
+                        <p class="mb-1"><strong>Date:</strong> {{ booking.session_date }}</p>
+                        <p class="mb-1"><strong>Time:</strong> {{ booking.start_time }} - {{ booking.end_time }}</p>
+                        {% if booking.teacher == session.username %}
+                        <p class="mb-0"><strong>Student:</strong> {{ booking.learner }}</p>
+                        {% else %}
+                        <p class="mb-0"><strong>Teacher:</strong> {{ booking.teacher }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="POST">
+                    <!-- Rating -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i data-feather="star" class="me-2"></i>Rating (1-10)
+                        </label>
+                        <div class="rating-buttons d-flex gap-2 flex-wrap">
+                            {% for i in range(1, 11) %}
+                            <input type="radio" class="btn-check" name="rating" id="rating{{ i }}" value="{{ i }}" required>
+                            <label class="btn btn-outline-warning" for="rating{{ i }}">{{ i }}</label>
+                            {% endfor %}
+                        </div>
+                        <div class="form-text">Rate from 1 (poor) to 10 (excellent)</div>
+                    </div>
+
+                    <!-- Feedback -->
+                    <div class="mb-4">
+                        <label for="feedback" class="form-label">
+                            <i data-feather="message-circle" class="me-2"></i>Feedback (Optional)
+                        </label>
+                        <textarea class="form-control" 
+                                  id="feedback" 
+                                  name="feedback" 
+                                  rows="4" 
+                                  placeholder="Share your experience, what you learned, or suggestions for improvement..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary me-md-2">
+                            <i data-feather="arrow-left" class="me-2"></i>Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i data-feather="star" class="me-2"></i>Submit Rating
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+        
+        // Add visual feedback for rating selection
+        const ratingInputs = document.querySelectorAll('input[name="rating"]');
+        ratingInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Remove active class from all labels
+                document.querySelectorAll('.rating-buttons label').forEach(label => {
+                    label.classList.remove('btn-warning');
+                    label.classList.add('btn-outline-warning');
+                });
+                
+                // Add active class to selected and previous labels
+                const selectedValue = parseInt(this.value);
+                for (let i = 1; i <= selectedValue; i++) {
+                    const label = document.querySelector(`label[for="rating${i}"]`);
+                    if (label) {
+                        label.classList.remove('btn-outline-warning');
+                        label.classList.add('btn-warning');
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

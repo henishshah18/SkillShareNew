@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- User Info Header -->
+        <div class="card bg-info text-white mb-4">
+            <div class="card-body text-center py-5">
+                <div class="mb-3">
+                    <i data-feather="user" style="width: 64px; height: 64px;"></i>
+                </div>
+                <h2 class="card-title">{{ user.username }}</h2>
+                {% if user.average_rating > 0 %}
+                <div class="mb-2">
+                    <span class="badge bg-warning text-dark fs-6">
+                        <i data-feather="star" class="me-1"></i>{{ user.average_rating }}/10 Rating
+                    </span>
+                </div>
+                {% endif %}
+                {% if user.bio %}
+                <p class="card-text">{{ user.bio }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="award" style="width: 32px; height: 32px; color: var(--bs-success);" class="mb-2"></i>
+                        <h3 class="text-success">{{ user.sessions_taught }}</h3>
+                        <p class="text-muted mb-0">Sessions Taught</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="book-open" style="width: 32px; height: 32px; color: var(--bs-info);" class="mb-2"></i>
+                        <h3 class="text-info">{{ user.sessions_attended }}</h3>
+                        <p class="text-muted mb-0">Sessions Attended</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="star" style="width: 32px; height: 32px; color: var(--bs-warning);" class="mb-2"></i>
+                        <h3 class="text-warning">{{ user.rating_count }}</h3>
+                        <p class="text-muted mb-0">Reviews</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="calendar" style="width: 32px; height: 32px; color: var(--bs-secondary);" class="mb-2"></i>
+                        <h3 class="text-secondary">{{ offers|length }}</h3>
+                        <p class="text-muted mb-0">Active Offers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="award" class="me-2"></i>Skills They Teach
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.skills_teach %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in user.skills_teach %}
+                            <span class="badge bg-success">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">No skills listed yet</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="book-open" class="me-2"></i>Skills They Want to Learn
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.skills_learn %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in user.skills_learn %}
+                            <span class="badge bg-info">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">No learning interests listed yet</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Links -->
+        {% if user.github_link or user.linkedin_link or user.website_link %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="link" class="me-2"></i>Connect
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2 flex-wrap">
+                    {% if user.github_link %}
+                    <a href="{{ user.github_link }}" target="_blank" class="btn btn-outline-secondary">
+                        <i data-feather="github" class="me-2"></i>GitHub
+                    </a>
+                    {% endif %}
+                    {% if user.linkedin_link %}
+                    <a href="{{ user.linkedin_link }}" target="_blank" class="btn btn-outline-secondary">
+                        <i data-feather="linkedin" class="me-2"></i>LinkedIn
+                    </a>
+                    {% endif %}
+                    {% if user.website_link %}
+                    <a href="{{ user.website_link }}" target="_blank" class="btn btn-outline-secondary">
+                        <i data-feather="globe" class="me-2"></i>Website
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Available Sessions -->
+        {% if offers %}
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i data-feather="calendar" class="me-2"></i>Available Sessions
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for offer in offers %}
+                <div class="card mb-3 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-title">{{ offer.title }}</h6>
+                            <span class="badge bg-primary">{{ offer.skill }}</span>
+                        </div>
+                        <p class="card-text">{{ offer.description }}</p>
+                        <p class="text-muted mb-2">
+                            <i data-feather="monitor" class="me-1"></i>{{ offer.mode }}
+                        </p>
+                        
+                        <!-- Dates -->
+                        <div class="mb-2">
+                            <strong>Available Dates:</strong>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                {% for date in offer.dates %}
+                                <span class="badge bg-secondary">{{ date }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Time Ranges -->
+                        <div class="mb-3">
+                            <strong>Time Slots:</strong>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                {% for time_range in offer.time_ranges %}
+                                <span class="badge bg-outline-secondary">{{ time_range[0] }} - {{ time_range[1] }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <a href="{{ url_for('book_session', teacher_username=user.username) }}" 
+                           class="btn btn-success">
+                            <i data-feather="calendar" class="me-2"></i>Book This Session
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Reviews -->
+        {% if user_ratings %}
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">
+                    <i data-feather="star" class="me-2"></i>Reviews ({{ user_ratings|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for rating in user_ratings[:5] %}
+                <div class="border-bottom pb-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong>{{ rating.rater }}</strong>
+                        <span class="badge bg-warning text-dark">
+                            {{ rating.rating }}/10
+                        </span>
+                    </div>
+                    {% if rating.feedback %}
+                    <p class="mb-0">{{ rating.feedback }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                {% if user_ratings|length > 5 %}
+                <p class="text-muted text-center mb-0">
+                    Showing 5 of {{ user_ratings|length }} reviews
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+            <a href="{{ url_for('find_teachers') }}" class="btn btn-secondary">
+                <i data-feather="arrow-left" class="me-2"></i>Back to Search
+            </a>
+            {% if offers %}
+            <a href="{{ url_for('book_session', teacher_username=user.username) }}" 
+               class="btn btn-success">
+                <i data-feather="calendar" class="me-2"></i>Book a Session
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+    });
+</script>
+{% endblock %}

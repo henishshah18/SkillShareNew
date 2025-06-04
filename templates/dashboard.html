@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Dashboard Header -->
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body text-center py-4">
+                <div class="mb-3">
+                    <i data-feather="calendar" style="width: 64px; height: 64px;"></i>
+                </div>
+                <h2 class="card-title">My Dashboard</h2>
+                <p class="card-text">Manage your teaching and learning sessions</p>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="award" style="width: 32px; height: 32px; color: var(--bs-success);" class="mb-2"></i>
+                        <h3 class="text-success">{{ upcoming_teaching|length }}</h3>
+                        <p class="text-muted mb-0">Upcoming Teaching</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="book-open" style="width: 32px; height: 32px; color: var(--bs-info);" class="mb-2"></i>
+                        <h3 class="text-info">{{ upcoming_learning|length }}</h3>
+                        <p class="text-muted mb-0">Upcoming Learning</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="check-circle" style="width: 32px; height: 32px; color: var(--bs-warning);" class="mb-2"></i>
+                        <h3 class="text-warning">{{ past_teaching|length }}</h3>
+                        <p class="text-muted mb-0">Sessions Taught</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="star" style="width: 32px; height: 32px; color: var(--bs-secondary);" class="mb-2"></i>
+                        <h3 class="text-secondary">{{ user.average_rating or 'N/A' }}</h3>
+                        <p class="text-muted mb-0">Average Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Overview -->
+        <div class="row g-4">
+            <!-- Teaching Sessions -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="award" class="me-2"></i>
+                            Teaching Sessions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upcoming Teaching -->
+                        {% if upcoming_teaching %}
+                        <h6 class="text-success fw-bold mb-3">
+                            <i data-feather="calendar" class="me-2"></i>Upcoming Sessions
+                        </h6>
+                        {% for session in upcoming_teaching %}
+                        <div class="card mb-3 border-success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title">Teaching {{ session.learner }}</h6>
+                                    <span class="badge bg-success">{{ session.status }}</span>
+                                </div>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="calendar" class="me-1"></i>{{ session.session_date }}
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <i data-feather="clock" class="me-1"></i>{{ session.start_time }} - {{ session.end_time }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        <!-- Past Teaching -->
+                        {% if past_teaching %}
+                        <h6 class="text-muted fw-bold mb-3 mt-4">
+                            <i data-feather="archive" class="me-2"></i>Past Sessions
+                        </h6>
+                        {% for session in past_teaching[:3] %}
+                        <div class="card mb-3 border-secondary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title text-muted">Taught {{ session.learner }}</h6>
+                                    <span class="badge bg-secondary">{{ session.status }}</span>
+                                </div>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="calendar" class="me-1"></i>{{ session.session_date }}
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('rate_session', booking_id=session.id) }}" 
+                                       class="btn btn-sm btn-outline-warning">
+                                        <i data-feather="star" class="me-1"></i>Rate Session
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not upcoming_teaching and not past_teaching %}
+                        <div class="text-center py-4">
+                            <i data-feather="award" style="width: 48px; height: 48px; color: var(--bs-secondary);" class="mb-3"></i>
+                            <p class="text-muted">No teaching sessions yet.</p>
+                            <a href="{{ url_for('offer') }}" class="btn btn-success">
+                                <i data-feather="plus" class="me-2"></i>Offer Your Skills
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Sessions -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="book-open" class="me-2"></i>
+                            Learning Sessions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upcoming Learning -->
+                        {% if upcoming_learning %}
+                        <h6 class="text-info fw-bold mb-3">
+                            <i data-feather="calendar" class="me-2"></i>Upcoming Sessions
+                        </h6>
+                        {% for session in upcoming_learning %}
+                        <div class="card mb-3 border-info">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title">Learning from {{ session.teacher }}</h6>
+                                    <span class="badge bg-info">{{ session.status }}</span>
+                                </div>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="calendar" class="me-1"></i>{{ session.session_date }}
+                                </p>
+                                <p class="text-muted mb-2">
+                                    <i data-feather="clock" class="me-1"></i>{{ session.start_time }} - {{ session.end_time }}
+                                </p>
+                                <a href="{{ url_for('view_user_profile', username=session.teacher) }}" 
+                                   class="btn btn-sm btn-outline-info">
+                                    <i data-feather="user" class="me-1"></i>View Teacher
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        <!-- Past Learning -->
+                        {% if past_learning %}
+                        <h6 class="text-muted fw-bold mb-3 mt-4">
+                            <i data-feather="archive" class="me-2"></i>Past Sessions
+                        </h6>
+                        {% for session in past_learning[:3] %}
+                        <div class="card mb-3 border-secondary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title text-muted">Learned from {{ session.teacher }}</h6>
+                                    <span class="badge bg-secondary">{{ session.status }}</span>
+                                </div>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="calendar" class="me-1"></i>{{ session.session_date }}
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('rate_session', booking_id=session.id) }}" 
+                                       class="btn btn-sm btn-outline-warning">
+                                        <i data-feather="star" class="me-1"></i>Rate Session
+                                    </a>
+                                    <a href="{{ url_for('view_user_profile', username=session.teacher) }}" 
+                                       class="btn btn-sm btn-outline-info">
+                                        <i data-feather="user" class="me-1"></i>View Teacher
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not upcoming_learning and not past_learning %}
+                        <div class="text-center py-4">
+                            <i data-feather="book-open" style="width: 48px; height: 48px; color: var(--bs-secondary);" class="mb-3"></i>
+                            <p class="text-muted">No learning sessions yet.</p>
+                            <a href="{{ url_for('find_teachers') }}" class="btn btn-info">
+                                <i data-feather="search" class="me-2"></i>Find Teachers
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-3 mt-4">
+            <div class="col-md-3">
+                <a href="{{ url_for('find_teachers') }}" class="btn btn-info w-100 py-3">
+                    <i data-feather="search" class="me-2"></i>
+                    <span class="fw-bold">Find Teachers</span>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('offer') }}" class="btn btn-success w-100 py-3">
+                    <i data-feather="plus-circle" class="me-2"></i>
+                    <span class="fw-bold">Offer Skills</span>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('profile') }}" class="btn btn-warning w-100 py-3">
+                    <i data-feather="user" class="me-2"></i>
+                    <span class="fw-bold">Edit Profile</span>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('view_user_profile', username=user.username) }}" class="btn btn-secondary w-100 py-3">
+                    <i data-feather="eye" class="me-2"></i>
+                    <span class="fw-bold">View Public Profile</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+    });
+</script>
+{% endblock %}

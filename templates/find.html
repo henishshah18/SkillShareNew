@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Find Teachers - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i data-feather="search" style="width: 48px; height: 48px; color: var(--bs-info);"></i>
+                    <h2 class="card-title mt-3">Find Teachers</h2>
+                    <p class="text-muted">Search for skilled community members to learn from</p>
+                </div>
+
+                <form method="POST" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               name="skill" 
+                               value="{{ skill or '' }}"
+                               placeholder="What skill do you want to learn? (e.g., Python, Guitar, Photography)"
+                               required>
+                        <button type="submit" class="btn btn-info btn-lg">
+                            <i data-feather="search" class="me-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+
+                {% if skill %}
+                <div class="alert alert-info">
+                    <i data-feather="info" class="me-2"></i>
+                    Search results for: <strong>{{ skill }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if teachers %}
+        <div class="row g-4">
+            {% for teacher in teachers %}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title">{{ teacher.username }}</h5>
+                            {% if teacher.average_rating > 0 %}
+                            <span class="badge bg-warning text-dark">
+                                <i data-feather="star" class="me-1"></i>{{ teacher.average_rating }}/10
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        {% if teacher.bio %}
+                        <p class="card-text">{{ teacher.bio[:150] }}{% if teacher.bio|length > 150 %}...{% endif %}</p>
+                        {% endif %}
+
+                        <!-- Skills -->
+                        <div class="mb-3">
+                            <strong>Skills:</strong>
+                            <div class="mt-2">
+                                {% for skill_tag in teacher.skills_teach %}
+                                <span class="badge bg-primary me-1 mb-1">{{ skill_tag }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <small class="text-muted">Sessions Taught</small>
+                                <div class="fw-bold">{{ teacher.sessions_taught }}</div>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Sessions Attended</small>
+                                <div class="fw-bold">{{ teacher.sessions_attended }}</div>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Reviews</small>
+                                <div class="fw-bold">{{ teacher.rating_count }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Links -->
+                        {% if teacher.github_link or teacher.linkedin_link or teacher.website_link %}
+                        <div class="mb-3">
+                            {% if teacher.github_link %}
+                            <a href="{{ teacher.github_link }}" target="_blank" class="btn btn-outline-secondary btn-sm me-2">
+                                <i data-feather="github" class="me-1"></i>GitHub
+                            </a>
+                            {% endif %}
+                            {% if teacher.linkedin_link %}
+                            <a href="{{ teacher.linkedin_link }}" target="_blank" class="btn btn-outline-secondary btn-sm me-2">
+                                <i data-feather="linkedin" class="me-1"></i>LinkedIn
+                            </a>
+                            {% endif %}
+                            {% if teacher.website_link %}
+                            <a href="{{ teacher.website_link }}" target="_blank" class="btn btn-outline-secondary btn-sm me-2">
+                                <i data-feather="globe" class="me-1"></i>Website
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="{{ url_for('view_user_profile', username=teacher.username) }}" 
+                               class="btn btn-outline-info flex-fill">
+                                <i data-feather="user" class="me-2"></i>View Profile
+                            </a>
+                            <a href="{{ url_for('book_session', teacher_username=teacher.username) }}" 
+                               class="btn btn-success flex-fill">
+                                <i data-feather="calendar" class="me-2"></i>Book Session
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% elif skill %}
+        <div class="text-center py-5">
+            <i data-feather="users" style="width: 64px; height: 64px; color: var(--bs-secondary);" class="mb-3"></i>
+            <h4>No teachers found for "{{ skill }}"</h4>
+            <p class="text-muted">Try searching for a different skill or check back later as more teachers join the community.</p>
+            <a href="{{ url_for('offer') }}" class="btn btn-primary">
+                <i data-feather="plus-circle" class="me-2"></i>Be the first to offer this skill!
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+    });
+</script>
+{% endblock %}

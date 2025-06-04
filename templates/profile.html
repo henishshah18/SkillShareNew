@@ -12,7 +12,108 @@
                     <i data-feather="user" style="width: 64px; height: 64px;"></i>
                 </div>
                 <h2 class="card-title">{{ username }}'s Profile</h2>
+                {% if user.average_rating > 0 %}
+                <span class="badge bg-warning text-dark fs-6">
+                    <i data-feather="star" class="me-1"></i>{{ user.average_rating }}/10 Rating
+                </span>
+                {% endif %}
                 <p class="card-text">Track your skill sharing journey</p>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="edit" class="me-2"></i>Edit Profile
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3">
+                        <!-- Bio -->
+                        <div class="col-12">
+                            <label for="bio" class="form-label">
+                                <i data-feather="user" class="me-2"></i>Bio
+                            </label>
+                            <textarea class="form-control" 
+                                      id="bio" 
+                                      name="bio" 
+                                      rows="3" 
+                                      placeholder="Tell others about yourself, your experience, and what you're passionate about...">{{ user.bio or '' }}</textarea>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="col-md-6">
+                            <label for="skills_teach" class="form-label">
+                                <i data-feather="award" class="me-2"></i>Skills I Can Teach
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="skills_teach" 
+                                   name="skills_teach" 
+                                   value="{{ user.skills_teach | join(', ') if user.skills_teach else '' }}"
+                                   placeholder="e.g., Python, Guitar, Photography, Marketing">
+                            <div class="form-text">Separate skills with commas</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="skills_learn" class="form-label">
+                                <i data-feather="book-open" class="me-2"></i>Skills I Want to Learn
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="skills_learn" 
+                                   name="skills_learn" 
+                                   value="{{ user.skills_learn | join(', ') if user.skills_learn else '' }}"
+                                   placeholder="e.g., Spanish, Web Design, Cooking, Data Science">
+                            <div class="form-text">Separate skills with commas</div>
+                        </div>
+
+                        <!-- Social Links -->
+                        <div class="col-md-4">
+                            <label for="github_link" class="form-label">
+                                <i data-feather="github" class="me-2"></i>GitHub Profile
+                            </label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="github_link" 
+                                   name="github_link" 
+                                   value="{{ user.github_link or '' }}"
+                                   placeholder="https://github.com/username">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="linkedin_link" class="form-label">
+                                <i data-feather="linkedin" class="me-2"></i>LinkedIn Profile
+                            </label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="linkedin_link" 
+                                   name="linkedin_link" 
+                                   value="{{ user.linkedin_link or '' }}"
+                                   placeholder="https://linkedin.com/in/username">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="website_link" class="form-label">
+                                <i data-feather="globe" class="me-2"></i>Personal Website
+                            </label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="website_link" 
+                                   name="website_link" 
+                                   value="{{ user.website_link or '' }}"
+                                   placeholder="https://yourwebsite.com">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="save" class="me-2"></i>Update Profile
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
