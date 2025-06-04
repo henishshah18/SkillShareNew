@@ -1,0 +1,127 @@
+Build a full-stack peer-to-peer skill-sharing app using Flask and Replit DB.
+
+Every user can both teach and learn. There are no fixed roles.
+
+The app must include the following:
+
+🔐 1. Authentication
+Signup, Login, Logout
+
+Store user data in Replit DB securely
+
+Use Flask sessions
+
+🧑‍🎓 2. User Profile (/profile)
+Each user profile should contain:
+
+Name
+
+Short bio
+
+Skills I can teach (list of skill tags)
+
+Skills I want to learn (tags)
+
+Social media / GitHub links
+
+Stats:
+
+Sessions taught
+
+Sessions attended
+
+Average rating
+
+Let users edit their profile anytime.
+
+📆 3. Offer a Skill Session (/offer)
+Select one of their teachable skills
+
+Add:
+
+Description
+
+Availability (multiple dates, multiple time ranges)
+
+Save these offers under the user profile
+
+Validate: No past dates or malformed time
+
+🔍 4. Request a Session (/request)
+Choose a skill they want to learn
+
+Enter:
+
+Preferred date range(s)
+
+Preferred time range(s)
+
+System should:
+
+Match users who offer that skill
+
+Whose availability overlaps
+
+Display matches with:
+
+Name, rating, skill tags, links
+
+“View Profile” and “Book” buttons
+
+🤝 5. Booking a Session
+Learner selects a matched user
+
+Selects from their availability
+
+Clicks “Book Session”
+
+Session is stored in both users’ schedule
+
+Availability slot is removed or marked as booked
+
+⭐ 6. Ratings
+After a session occurs:
+
+Each user gets option to rate the other (1–10)
+
+Store rating + optional feedback
+
+Update average rating for each user
+
+📊 7. Dashboard (/dashboard)
+Show both:
+
+Sessions offered (upcoming/past)
+
+Sessions booked (upcoming/past)
+
+Reviews given/received
+
+📁 8. Pages and Routes
+Route	Description
+/	Landing page + search
+/signup//login	Auth
+/profile	View/edit own profile
+/user/<username>	View someone else's profile
+/offer	Offer skill session
+/request	Find someone to learn from
+/book/<username>	Book session with matched user
+/dashboard	Unified schedule + review panel
+
+📦 Tech Requirements
+Flask + Jinja2 templates
+
+Replit DB for all storage
+
+Responsive HTML/CSS (style.css)
+
+Error handling + input retention
+
+⚠️ Key Rules:
+Any user can offer or request at any time
+
+Skills must match + times must overlap for booking
+
+No duplicate bookings per slot
+
+Each session should have two-way rating option

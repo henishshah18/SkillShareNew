@@ -37,21 +37,27 @@
                     </li>
                     {% if session.user_id %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('offer') }}">
-                            <i data-feather="plus-circle" class="me-1"></i>
-                            Offer Skill
+                        <a class="nav-link" href="{{ url_for('find_teachers') }}">
+                            <i data-feather="search" class="me-1"></i>
+                            Find Teachers
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('request_skill') }}">
-                            <i data-feather="search" class="me-1"></i>
-                            Request Skill
+                        <a class="nav-link" href="{{ url_for('offer') }}">
+                            <i data-feather="plus-circle" class="me-1"></i>
+                            Offer Skills
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i data-feather="calendar" class="me-1"></i>
+                            Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('profile') }}">
                             <i data-feather="user" class="me-1"></i>
-                            My Profile
+                            Profile
                         </a>
                     </li>
                     {% endif %}
