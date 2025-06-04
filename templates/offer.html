@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Offer a Skill - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i data-feather="plus-circle" style="width: 48px; height: 48px; color: var(--bs-success);"></i>
+                    <h2 class="card-title mt-3">Offer a Skill Session</h2>
+                    <p class="text-muted">Share your expertise with the community</p>
+                </div>
+
+                <form method="POST" novalidate>
+                    <!-- Basic Information -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="title" class="form-label">
+                                <i data-feather="bookmark" class="me-2"></i>Session Title
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="title" 
+                                   name="title" 
+                                   value="{{ title or '' }}"
+                                   required 
+                                   placeholder="e.g., Intro to Python Programming">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="skill" class="form-label">
+                                <i data-feather="award" class="me-2"></i>Skill Category
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="skill" 
+                                   name="skill" 
+                                   value="{{ skill or '' }}"
+                                   required 
+                                   placeholder="e.g., Programming, Design, Marketing">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i data-feather="file-text" class="me-2"></i>Session Description
+                        </label>
+                        <textarea class="form-control" 
+                                  id="description" 
+                                  name="description" 
+                                  rows="4" 
+                                  required 
+                                  placeholder="Describe what you'll teach, who it's for, and any prerequisites...">{{ description or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="mode" class="form-label">
+                            <i data-feather="monitor" class="me-2"></i>Session Type
+                        </label>
+                        <select class="form-select" id="mode" name="mode" required>
+                            <option value="">Choose session type...</option>
+                            <option value="Online" {{ 'selected' if mode == 'Online' }}>Online</option>
+                            <option value="Offline" {{ 'selected' if mode == 'Offline' }}>Offline</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i data-feather="calendar" class="me-2"></i>Availability
+                        </label>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           name="date_option" 
+                                           id="weekdays" 
+                                           value="weekdays"
+                                           {{ 'checked' if date_option == 'weekdays' }}>
+                                    <label class="form-check-label" for="weekdays">
+                                        <i data-feather="briefcase" class="me-2"></i>Weekdays
+                                        <small class="d-block text-muted">Monday - Friday</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           name="date_option" 
+                                           id="weekends" 
+                                           value="weekends"
+                                           {{ 'checked' if date_option == 'weekends' }}>
+                                    <label class="form-check-label" for="weekends">
+                                        <i data-feather="sun" class="me-2"></i>Weekends
+                                        <small class="d-block text-muted">Saturday - Sunday</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           name="date_option" 
+                                           id="custom" 
+                                           value="custom"
+                                           {{ 'checked' if date_option == 'custom' }}>
+                                    <label class="form-check-label" for="custom">
+                                        <i data-feather="settings" class="me-2"></i>Custom Dates
+                                        <small class="d-block text-muted">Choose specific dates</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Date Selection -->
+                    <div id="custom-dates-section" style="display: none;">
+                        <div class="mb-3">
+                            <label for="custom_dates" class="form-label">
+                                <i data-feather="calendar" class="me-2"></i>Select Dates
+                            </label>
+                            <input type="date" 
+                                   class="form-control mb-2" 
+                                   id="date-picker">
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="add-date">
+                                    <i data-feather="plus" class="me-1"></i>Add Date
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="clear-dates">
+                                    <i data-feather="x" class="me-1"></i>Clear All
+                                </button>
+                            </div>
+                            <div id="selected-dates" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Time Ranges -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i data-feather="clock" class="me-2"></i>Available Time Ranges
+                            </label>
+                            <div id="time-ranges">
+                                <div class="time-range-row mb-2">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-md-4">
+                                            <input type="time" class="form-control" name="start_time" placeholder="Start time">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="time" class="form-control" name="end_time" placeholder="End time">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-time-range" disabled>
+                                                <i data-feather="minus" class="me-1"></i>Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-success btn-sm" id="add-time-range">
+                                <i data-feather="plus" class="me-1"></i>Add Time Range
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('profile') }}" class="btn btn-secondary me-md-2">
+                            <i data-feather="arrow-left" class="me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i data-feather="save" class="me-2"></i>Offer Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateOptions = document.querySelectorAll('input[name="date_option"]');
+        const customDatesSection = document.getElementById('custom-dates-section');
+        const datePicker = document.getElementById('date-picker');
+        const addDateBtn = document.getElementById('add-date');
+        const clearDatesBtn = document.getElementById('clear-dates');
+        const selectedDatesContainer = document.getElementById('selected-dates');
+        const timeRangesContainer = document.getElementById('time-ranges');
+        const addTimeRangeBtn = document.getElementById('add-time-range');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        datePicker.min = today;
+
+        // Handle date option changes
+        dateOptions.forEach(option => {
+            option.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customDatesSection.style.display = 'block';
+                } else {
+                    customDatesSection.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize display based on current selection
+        const checkedOption = document.querySelector('input[name="date_option"]:checked');
+        if (checkedOption && checkedOption.value === 'custom') {
+            customDatesSection.style.display = 'block';
+        }
+
+        // Add date functionality
+        addDateBtn.addEventListener('click', function() {
+            const selectedDate = datePicker.value;
+            if (selectedDate) {
+                addDateBadge(selectedDate);
+                datePicker.value = '';
+            }
+        });
+
+        // Clear all dates
+        clearDatesBtn.addEventListener('click', function() {
+            selectedDatesContainer.innerHTML = '';
+        });
+
+        // Add date badge
+        function addDateBadge(date) {
+            // Check if date already exists
+            const existingDates = selectedDatesContainer.querySelectorAll('.date-badge');
+            for (let badge of existingDates) {
+                if (badge.dataset.date === date) {
+                    return; // Date already added
+                }
+            }
+
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary date-badge';
+            badge.dataset.date = date;
+            badge.innerHTML = `
+                ${new Date(date).toLocaleDateString()}
+                <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove"></button>
+                <input type="hidden" name="custom_dates" value="${date}">
+            `;
+
+            badge.querySelector('.btn-close').addEventListener('click', function() {
+                badge.remove();
+            });
+
+            selectedDatesContainer.appendChild(badge);
+        }
+
+        // Add time range functionality
+        addTimeRangeBtn.addEventListener('click', function() {
+            const newRow = document.createElement('div');
+            newRow.className = 'time-range-row mb-2';
+            newRow.innerHTML = `
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <input type="time" class="form-control" name="start_time" placeholder="Start time">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="time" class="form-control" name="end_time" placeholder="End time">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-time-range">
+                            <i data-feather="minus" class="me-1"></i>Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            newRow.querySelector('.remove-time-range').addEventListener('click', function() {
+                newRow.remove();
+                updateRemoveButtons();
+            });
+
+            timeRangesContainer.appendChild(newRow);
+            updateRemoveButtons();
+            feather.replace();
+        });
+
+        // Update remove button states
+        function updateRemoveButtons() {
+            const removeButtons = timeRangesContainer.querySelectorAll('.remove-time-range');
+            removeButtons.forEach((btn, index) => {
+                btn.disabled = removeButtons.length === 1;
+            });
+        }
+
+        // Initial setup for remove buttons
+        document.querySelectorAll('.remove-time-range').forEach(btn => {
+            btn.addEventListener('click', function() {
+                btn.closest('.time-range-row').remove();
+                updateRemoveButtons();
+            });
+        });
+
+        updateRemoveButtons();
+        feather.replace();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Profile Header -->
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body text-center py-4">
+                <div class="mb-3">
+                    <i data-feather="user" style="width: 64px; height: 64px;"></i>
+                </div>
+                <h2 class="card-title">{{ username }}'s Profile</h2>
+                <p class="card-text">Track your skill sharing journey</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <a href="{{ url_for('offer') }}" class="btn btn-success w-100 py-3">
+                    <i data-feather="plus-circle" class="me-2"></i>
+                    <span class="fw-bold">Offer New Skill</span>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('request_skill') }}" class="btn btn-info w-100 py-3">
+                    <i data-feather="search" class="me-2"></i>
+                    <span class="fw-bold">Request New Skill</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sessions Overview -->
+        <div class="row g-4">
+            <!-- Offered Sessions -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="gift" class="me-2"></i>
+                            Skills I'm Offering
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upcoming Offers -->
+                        {% if upcoming_offers %}
+                        <h6 class="text-success fw-bold mb-3">
+                            <i data-feather="calendar" class="me-2"></i>Upcoming Sessions
+                        </h6>
+                        {% for session in upcoming_offers %}
+                        <div class="card mb-3 border-success">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ session.title }}</h6>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="award" class="me-1"></i>{{ session.skill }}
+                                </p>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="monitor" class="me-1"></i>{{ session.mode }}
+                                </p>
+                                <p class="card-text small">{{ session.description[:100] }}{% if session.description|length > 100 %}...{% endif %}</p>
+                                
+                                <!-- Dates -->
+                                <div class="mb-2">
+                                    <strong>Dates:</strong>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for date in session.dates %}
+                                        <span class="badge bg-success">{{ date }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Time Ranges -->
+                                <div>
+                                    <strong>Times:</strong>
+                                    {% for time_range in session.time_ranges %}
+                                    <span class="badge bg-secondary me-1">{{ time_range[0] }} - {{ time_range[1] }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        <!-- Past Offers -->
+                        {% if past_offers %}
+                        <h6 class="text-muted fw-bold mb-3 mt-4">
+                            <i data-feather="archive" class="me-2"></i>Past Sessions
+                        </h6>
+                        {% for session in past_offers %}
+                        <div class="card mb-3 border-secondary">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">{{ session.title }}</h6>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="award" class="me-1"></i>{{ session.skill }}
+                                </p>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="monitor" class="me-1"></i>{{ session.mode }}
+                                </p>
+                                
+                                <!-- Dates -->
+                                <div>
+                                    <strong>Dates:</strong>
+                                    {% for date in session.dates %}
+                                    <span class="badge bg-secondary">{{ date }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not upcoming_offers and not past_offers %}
+                        <div class="text-center py-4">
+                            <i data-feather="gift" style="width: 48px; height: 48px; color: var(--bs-secondary);" class="mb-3"></i>
+                            <p class="text-muted">You haven't offered any skills yet.</p>
+                            <a href="{{ url_for('offer') }}" class="btn btn-success">
+                                <i data-feather="plus" class="me-2"></i>Offer Your First Skill
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requested Sessions -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="book-open" class="me-2"></i>
+                            Skills I Want to Learn
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upcoming Requests -->
+                        {% if upcoming_requests %}
+                        <h6 class="text-info fw-bold mb-3">
+                            <i data-feather="calendar" class="me-2"></i>Active Requests
+                        </h6>
+                        {% for session in upcoming_requests %}
+                        <div class="card mb-3 border-info">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ session.skill }}</h6>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="monitor" class="me-1"></i>{{ session.mode }}
+                                </p>
+                                
+                                <!-- Dates -->
+                                <div class="mb-2">
+                                    <strong>Preferred Dates:</strong>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for date in session.dates %}
+                                        <span class="badge bg-info">{{ date }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Time Ranges -->
+                                <div>
+                                    <strong>Preferred Times:</strong>
+                                    {% for time_range in session.time_ranges %}
+                                    <span class="badge bg-secondary me-1">{{ time_range[0] }} - {{ time_range[1] }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        <!-- Past Requests -->
+                        {% if past_requests %}
+                        <h6 class="text-muted fw-bold mb-3 mt-4">
+                            <i data-feather="archive" class="me-2"></i>Past Requests
+                        </h6>
+                        {% for session in past_requests %}
+                        <div class="card mb-3 border-secondary">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">{{ session.skill }}</h6>
+                                <p class="text-muted mb-1">
+                                    <i data-feather="monitor" class="me-1"></i>{{ session.mode }}
+                                </p>
+                                
+                                <!-- Dates -->
+                                <div>
+                                    <strong>Dates:</strong>
+                                    {% for date in session.dates %}
+                                    <span class="badge bg-secondary">{{ date }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not upcoming_requests and not past_requests %}
+                        <div class="text-center py-4">
+                            <i data-feather="book-open" style="width: 48px; height: 48px; color: var(--bs-secondary);" class="mb-3"></i>
+                            <p class="text-muted">You haven't requested any skills yet.</p>
+                            <a href="{{ url_for('request_skill') }}" class="btn btn-info">
+                                <i data-feather="search" class="me-2"></i>Request Your First Skill
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="gift" style="width: 32px; height: 32px; color: var(--bs-success);" class="mb-2"></i>
+                        <h3 class="text-success">{{ (upcoming_offers + past_offers)|length }}</h3>
+                        <p class="text-muted mb-0">Skills Offered</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="book-open" style="width: 32px; height: 32px; color: var(--bs-info);" class="mb-2"></i>
+                        <h3 class="text-info">{{ (upcoming_requests + past_requests)|length }}</h3>
+                        <p class="text-muted mb-0">Skills Requested</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="calendar" style="width: 32px; height: 32px; color: var(--bs-warning);" class="mb-2"></i>
+                        <h3 class="text-warning">{{ upcoming_offers|length + upcoming_requests|length }}</h3>
+                        <p class="text-muted mb-0">Upcoming Sessions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i data-feather="check-circle" style="width: 32px; height: 32px; color: var(--bs-secondary);" class="mb-2"></i>
+                        <h3 class="text-secondary">{{ past_offers|length + past_requests|length }}</h3>
+                        <p class="text-muted mb-0">Completed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i data-feather="log-in" style="width: 48px; height: 48px; color: var(--bs-primary);"></i>
+                    <h2 class="card-title mt-3">Welcome Back</h2>
+                    <p class="text-muted">Login to your account</p>
+                </div>
+
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i data-feather="user" class="me-2"></i>Username
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               value="{{ username or '' }}"
+                               required 
+                               autocomplete="username">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i data-feather="lock" class="me-2"></i>Password
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               autocomplete="current-password">
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i data-feather="log-in" class="me-2"></i>Login
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <p class="mb-0">Don't have an account? 
+                        <a href="{{ url_for('signup') }}" class="text-decoration-none">
+                            <i data-feather="user-plus" class="me-1"></i>Sign up here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize feather icons after form updates
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+    });
+</script>
+{% endblock %}

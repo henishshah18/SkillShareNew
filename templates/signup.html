@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - SkillShare Scheduler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i data-feather="user-plus" style="width: 48px; height: 48px; color: var(--bs-primary);"></i>
+                    <h2 class="card-title mt-3">Create Account</h2>
+                    <p class="text-muted">Join the SkillShare community</p>
+                </div>
+
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i data-feather="user" class="me-2"></i>Username
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               value="{{ username or '' }}"
+                               required 
+                               autocomplete="username">
+                        <div class="form-text">Choose a unique username for your profile</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i data-feather="mail" class="me-2"></i>Email Address
+                        </label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="email" 
+                               name="email" 
+                               value="{{ email or '' }}"
+                               required 
+                               autocomplete="email">
+                        <div class="form-text">We'll never share your email with anyone else</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i data-feather="lock" class="me-2"></i>Password
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               autocomplete="new-password"
+                               minlength="6">
+                        <div class="form-text">Password must be at least 6 characters long</div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i data-feather="user-plus" class="me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <p class="mb-0">Already have an account? 
+                        <a href="{{ url_for('login') }}" class="text-decoration-none">
+                            <i data-feather="log-in" class="me-1"></i>Login here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize feather icons after form updates
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+    });
+</script>
+{% endblock %}
