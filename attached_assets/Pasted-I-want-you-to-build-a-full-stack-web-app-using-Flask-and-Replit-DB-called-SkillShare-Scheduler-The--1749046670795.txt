@@ -1,0 +1,121 @@
+I want you to build a full stack web app using Flask and Replit DB called SkillShare Scheduler.
+The goal is to let users offer skill sessions, request skill sessions, and track their sessions in their own profile calendar.
+
+🔧 📋 TASKS TO COMPLETE
+1. ✅ Authentication
+Allow users to sign up (username, email, password)
+
+Allow login and logout via Flask sessions
+
+Store user credentials in Replit DB securely (don’t store raw passwords)
+
+After login, redirect to /profile
+
+2. ✅ Offer a Skill Session (Form on /offer)
+Fields:
+
+Title
+
+Skill (dropdown or text)
+
+Description
+
+Session Type: Online or Offline (radio or dropdown)
+
+Session Date Options:
+
+Presets: Weekdays, Weekends
+
+Custom Dates: allow selecting multiple dates
+
+For custom, allow multiple time ranges (e.g. 10AM–12PM, 2PM–4PM)
+
+Add a “+” button to dynamically add more time ranges (start-end)
+
+Save all submitted sessions to Replit DB under the logged-in user
+
+Ensure all previous input is preserved if the form has errors
+
+3. ✅ Request a Skill Session (Form on /request)
+Fields:
+
+Skill you want
+
+Preferred session type (online/offline)
+
+Custom dates (multiple date picker)
+
+Preferred time ranges (same UI as offer form)
+
+Save the request to DB under the user’s name
+
+4. ✅ Validation and Error Handling
+Do not allow past dates or time ranges that are earlier than current time
+
+If an error occurs:
+
+Show an error message in red
+
+Preserve all previously entered form values
+
+Use datetime.now() and compare against user input
+
+5. ✅ Session Calendar + Profile Page (/profile)
+Show the logged-in user:
+
+All sessions they’ve offered
+
+All sessions they’ve requested
+
+Display as cards or in a table with:
+
+Title / Skill / Mode / Date(s) / Time Ranges
+
+Group by upcoming and past sessions
+
+6. ✅ Home Page (/)
+If logged in:
+
+Show welcome message
+
+Links to:
+
+Offer a Skill
+
+Request a Skill
+
+My Profile
+
+Logout
+
+If not logged in:
+
+Show welcome + Sign Up / Login buttons
+
+7. ✅ Templates and Structure
+Use Jinja2 for all templates
+
+Create clean files:
+
+templates/offer.html, request.html, profile.html, login.html, signup.html, index.html
+
+static/style.css with minimal styling
+
+Include navigation bar for easy user flow
+
+8. ✅ Data Format Suggestion
+Store sessions in this format:
+
+python
+Copy
+Edit
+{
+  "user": "johndoe",
+  "title": "Intro to Figma",
+  "skill": "Figma",
+  "description": "...",
+  "mode": "Online",
+  "dates": ["2025-06-05", "2025-06-07"],
+  "time_ranges": [["10:00", "12:00"], ["14:00", "16:00"]],
+  "timestamp": "created_at"
+}
