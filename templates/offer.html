@@ -195,16 +195,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         const dateOptions = document.querySelectorAll('input[name="date_option"]');
         const customDatesSection = document.getElementById('custom-dates-section');
-        const datePicker = document.getElementById('date-picker');
-        const addDateBtn = document.getElementById('add-date');
-        const clearDatesBtn = document.getElementById('clear-dates');
         const selectedDatesContainer = document.getElementById('selected-dates');
         const timeRangesContainer = document.getElementById('time-ranges');
         const addTimeRangeBtn = document.getElementById('add-time-range');
-
-        // Set minimum date to today
-        const today = new Date().toISOString().split('T')[0];
-        datePicker.min = today;
 
         // Handle date option changes
         dateOptions.forEach(option => {
