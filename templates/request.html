@@ -42,21 +42,31 @@
 
                     <!-- Date Selection -->
                     <div class="mb-3">
-                        <label for="custom_dates" class="form-label">
+                        <label class="form-label">
                             <i data-feather="calendar" class="me-2"></i>Preferred Dates
                         </label>
-                        <input type="date" 
-                               class="form-control mb-2" 
-                               id="date-picker">
-                        <div class="d-flex gap-2 mb-2">
-                            <button type="button" class="btn btn-outline-primary btn-sm" id="add-date">
-                                <i data-feather="plus" class="me-1"></i>Add Date
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="clear-dates">
-                                <i data-feather="x" class="me-1"></i>Clear All
-                            </button>
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="calendar-container">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="prev-month">
+                                            <i data-feather="chevron-left"></i>
+                                        </button>
+                                        <h5 id="calendar-title" class="mb-0"></h5>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="next-month">
+                                            <i data-feather="chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    <div id="calendar-grid" class="calendar-grid"></div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="clear-dates">
+                                        <i data-feather="x" class="me-1"></i>Clear All
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div id="selected-dates" class="d-flex flex-wrap gap-2 mb-3"></div>
+                        <div id="selected-dates" class="d-flex flex-wrap gap-2 mt-3"></div>
                         <div class="form-text">Select multiple dates when you're available to learn</div>
                     </div>
 
@@ -106,56 +116,116 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const datePicker = document.getElementById('date-picker');
-        const addDateBtn = document.getElementById('add-date');
-        const clearDatesBtn = document.getElementById('clear-dates');
         const selectedDatesContainer = document.getElementById('selected-dates');
         const timeRangesContainer = document.getElementById('time-ranges');
         const addTimeRangeBtn = document.getElementById('add-time-range');
 
-        // Set minimum date to today
-        const today = new Date().toISOString().split('T')[0];
-        datePicker.min = today;
+        // Calendar functionality
+        let currentDate = new Date();
+        let selectedDates = new Set();
 
-        // Add date functionality
-        addDateBtn.addEventListener('click', function() {
-            const selectedDate = datePicker.value;
-            if (selectedDate) {
-                addDateBadge(selectedDate);
-                datePicker.value = '';
+        function generateCalendar(year, month) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            const calendarGrid = document.getElementById('calendar-grid');
+            const calendarTitle = document.getElementById('calendar-title');
+            
+            calendarTitle.textContent = firstDay.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            let calendarHTML = '<div class="calendar-weekdays">';
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                calendarHTML += `<div class="calendar-weekday">${day}</div>`;
+            });
+            calendarHTML += '</div><div class="calendar-days">';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < 42; i++) {
+                const currentDay = new Date(startDate);
+                currentDay.setDate(startDate.getDate() + i);
+                
+                const isCurrentMonth = currentDay.getMonth() === month;
+                const isPast = currentDay < today;
+                const dateString = currentDay.toISOString().split('T')[0];
+                const isSelected = selectedDates.has(dateString);
+                
+                let dayClass = 'calendar-day';
+                if (!isCurrentMonth) dayClass += ' other-month';
+                if (isPast) dayClass += ' past';
+                if (isSelected) dayClass += ' selected';
+                
+                calendarHTML += `<button type="button" class="${dayClass}" data-date="${dateString}" ${isPast ? 'disabled' : ''}>${currentDay.getDate()}</button>`;
             }
+            
+            calendarHTML += '</div>';
+            calendarGrid.innerHTML = calendarHTML;
+
+            // Add click listeners to calendar days
+            calendarGrid.querySelectorAll('.calendar-day:not(.past)').forEach(dayBtn => {
+                dayBtn.addEventListener('click', function() {
+                    const dateString = this.dataset.date;
+                    if (selectedDates.has(dateString)) {
+                        selectedDates.delete(dateString);
+                        this.classList.remove('selected');
+                    } else {
+                        selectedDates.add(dateString);
+                        this.classList.add('selected');
+                    }
+                    updateSelectedDatesDisplay();
+                });
+            });
+        }
+
+        function updateSelectedDatesDisplay() {
+            const container = document.getElementById('selected-dates');
+            container.innerHTML = '';
+            
+            Array.from(selectedDates).sort().forEach(dateString => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-info date-badge';
+                badge.innerHTML = `
+                    ${new Date(dateString).toLocaleDateString()}
+                    <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove"></button>
+                    <input type="hidden" name="custom_dates" value="${dateString}">
+                `;
+                
+                badge.querySelector('.btn-close').addEventListener('click', function() {
+                    selectedDates.delete(dateString);
+                    badge.remove();
+                    // Update calendar display
+                    const dayBtn = document.querySelector(`[data-date="${dateString}"]`);
+                    if (dayBtn) dayBtn.classList.remove('selected');
+                });
+                
+                container.appendChild(badge);
+            });
+        }
+
+        // Calendar navigation
+        document.getElementById('prev-month').addEventListener('click', function() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar(currentDate.getFullYear(), currentDate.getMonth());
+        });
+
+        document.getElementById('next-month').addEventListener('click', function() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar(currentDate.getFullYear(), currentDate.getMonth());
         });
 
         // Clear all dates
-        clearDatesBtn.addEventListener('click', function() {
-            selectedDatesContainer.innerHTML = '';
+        document.getElementById('clear-dates').addEventListener('click', function() {
+            selectedDates.clear();
+            updateSelectedDatesDisplay();
+            generateCalendar(currentDate.getFullYear(), currentDate.getMonth());
         });
 
-        // Add date badge
-        function addDateBadge(date) {
-            // Check if date already exists
-            const existingDates = selectedDatesContainer.querySelectorAll('.date-badge');
-            for (let badge of existingDates) {
-                if (badge.dataset.date === date) {
-                    return; // Date already added
-                }
-            }
-
-            const badge = document.createElement('span');
-            badge.className = 'badge bg-info date-badge';
-            badge.dataset.date = date;
-            badge.innerHTML = `
-                ${new Date(date).toLocaleDateString()}
-                <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove"></button>
-                <input type="hidden" name="custom_dates" value="${date}">
-            `;
-
-            badge.querySelector('.btn-close').addEventListener('click', function() {
-                badge.remove();
-            });
-
-            selectedDatesContainer.appendChild(badge);
-        }
+        // Initialize calendar
+        generateCalendar(currentDate.getFullYear(), currentDate.getMonth());
 
         // Add time range functionality
         addTimeRangeBtn.addEventListener('click', function() {

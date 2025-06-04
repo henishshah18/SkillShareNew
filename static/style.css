@@ -120,3 +120,89 @@ body {
 main {
     flex: 1;
 }
+
+/* Calendar Styles */
+.calendar-grid {
+    max-width: 100%;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-bottom: 2px;
+}
+
+.calendar-weekday {
+    padding: 8px;
+    text-align: center;
+    font-weight: 600;
+    background-color: var(--bs-light);
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+}
+
+.calendar-day {
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid var(--bs-border-color);
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-day:hover:not(:disabled) {
+    background-color: var(--bs-primary);
+    color: white;
+    border-color: var(--bs-primary);
+}
+
+.calendar-day.selected {
+    background-color: var(--bs-success);
+    color: white;
+    border-color: var(--bs-success);
+    font-weight: 600;
+}
+
+.calendar-day.other-month {
+    color: var(--bs-secondary);
+    background-color: var(--bs-secondary-bg);
+}
+
+.calendar-day.past {
+    color: var(--bs-secondary);
+    background-color: var(--bs-light);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.calendar-day:disabled {
+    pointer-events: none;
+}
+
+/* Mobile responsiveness for calendar */
+@media (max-width: 576px) {
+    .calendar-day {
+        padding: 8px 4px;
+        min-height: 35px;
+        font-size: 0.75rem;
+    }
+    
+    .calendar-weekday {
+        padding: 6px 4px;
+        font-size: 0.75rem;
+    }
+}

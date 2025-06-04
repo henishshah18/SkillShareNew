@@ -7,7 +7,26 @@ def get_user(username):
     """Get user by username"""
     try:
         users = db.get("users", {})
-        return users.get(username)
+        user = users.get(username)
+        if user:
+            # Ensure all new fields exist for backward compatibility
+            default_fields = {
+                'bio': '',
+                'skills_teach': [],
+                'skills_learn': [],
+                'github_link': '',
+                'linkedin_link': '',
+                'website_link': '',
+                'sessions_taught': 0,
+                'sessions_attended': 0,
+                'total_rating': 0,
+                'rating_count': 0,
+                'average_rating': 0
+            }
+            for key, default_value in default_fields.items():
+                if key not in user:
+                    user[key] = default_value
+        return user
     except Exception as e:
         logging.error(f"Error getting user {username}: {e}")
         return None
