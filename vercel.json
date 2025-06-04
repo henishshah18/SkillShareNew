@@ -15,12 +15,13 @@
     "env": {
         "FLASK_ENV": "production",
         "FLASK_APP": "app.py",
-        "VERCEL_ENV": "production"
+        "VERCEL_ENV": "production",
+        "PYTHONPATH": "."
     },
     "functions": {
         "app.py": {
             "memory": 1024,
-            "maxDuration": 30
+            "maxDuration": 60
         }
     }
 } 

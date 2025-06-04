@@ -26,6 +26,9 @@ if os.environ.get('VERCEL_ENV'):
     if not DATABASE_URL:
         logging.error("No database URL provided in production!")
     else:
+        # Ensure URL starts with postgresql://
+        if DATABASE_URL.startswith('postgres://'):
+            DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
         logging.info("Using PostgreSQL database in production")
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 else:
@@ -34,7 +37,7 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///skillshare.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-logging.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+logging.info(f"Database URI prefix: {app.config['SQLALCHEMY_DATABASE_URI'].split('://')[0] if app.config['SQLALCHEMY_DATABASE_URI'] else 'None'}")
 
 # Initialize the database
 db.init_app(app)
@@ -46,6 +49,8 @@ with app.app_context():
         logging.info("Database tables created successfully!")
     except Exception as e:
         logging.error(f"Error creating database tables: {e}")
+        if os.environ.get('VERCEL_ENV'):
+            logging.error("Database URL format being used: " + DATABASE_URL.split('@')[0].split('://')[0])
 
 @app.route('/')
 def index():
