@@ -12,9 +12,9 @@
                     <i data-feather="user" style="width: 64px; height: 64px;"></i>
                 </div>
                 <h2 class="card-title">{{ username }}'s Profile</h2>
-                {% if user.average_rating > 0 %}
+                {% if user and user.average_rating and user.average_rating > 0 %}
                 <span class="badge bg-warning text-dark fs-6">
-                    <i data-feather="star" class="me-1"></i>{{ user.average_rating }}/10 Rating
+                    <i data-feather="star" class="me-1"></i>{{ "%.1f"|format(user.average_rating|float) }}/10 Rating
                 </span>
                 {% endif %}
                 <p class="card-text">Track your skill sharing journey</p>

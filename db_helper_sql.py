@@ -28,12 +28,12 @@ class Session(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user = db.Column(db.String(80), db.ForeignKey('user.username'), nullable=False)
     type = db.Column(db.String(20), nullable=False)  # 'offer' or 'request'
-    title = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(200), nullable=True, default='')
     skill = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=True, default='')
     mode = db.Column(db.String(50), nullable=False)
-    dates = db.Column(db.JSON, nullable=False)
-    time_ranges = db.Column(db.JSON, nullable=False)
+    dates = db.Column(db.JSON, nullable=False, default=list)
+    time_ranges = db.Column(db.JSON, nullable=False, default=list)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Booking(db.Model):
@@ -103,22 +103,32 @@ def create_user(username, email, password_hash):
 def save_session(session_data):
     """Save a session (offer or request) to the database"""
     try:
+        logging.info(f"Attempting to save session with data: {session_data}")
+        
+        # Convert dates and time_ranges to JSON-serializable format if they aren't already
+        dates = session_data.get('dates', [])
+        time_ranges = session_data.get('time_ranges', [])
+        
         session = Session(
             user=session_data['user'],
             type=session_data['type'],
-            title=session_data['title'],
+            title=session_data.get('title', ''),  # Make title optional
             skill=session_data['skill'],
-            description=session_data['description'],
+            description=session_data.get('description', ''),  # Make description optional
             mode=session_data['mode'],
-            dates=session_data['dates'],
-            time_ranges=session_data['time_ranges']
+            dates=dates,
+            time_ranges=time_ranges
         )
+        logging.info("Session object created, attempting to add to database")
         db.session.add(session)
+        logging.info("Session added to database, attempting to commit")
         db.session.commit()
+        logging.info(f"Session saved successfully with ID: {session.id}")
         return session.id
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error saving session: {e}")
+        logging.error(f"Detailed error saving session: {str(e)}")
+        logging.error(f"Session data that caused error: {session_data}")
         return None
 
 def get_user_sessions(username):

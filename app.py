@@ -19,15 +19,39 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
 
 # Configure SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///skillshare.db')
+# Check if running on Vercel
+if os.environ.get('VERCEL_ENV'):
+    # Use PostgreSQL on Vercel
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_URL', '')
+else:
+    # Use SQLite for local development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///skillshare.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
 db.init_app(app)
 
+# Only create tables in development
+if not os.environ.get('VERCEL_ENV'):
+    with app.app_context():
+        db.create_all()
+
+def reset_database():
+    """Drop all tables and recreate them"""
+    with app.app_context():
+        logging.info("Dropping all database tables...")
+        db.drop_all()
+        logging.info("Creating all database tables...")
+        db.create_all()
+        logging.info("Database tables created successfully!")
+
 # Create all database tables
 with app.app_context():
-    db.create_all()
+    try:
+        reset_database()
+    except Exception as e:
+        logging.error(f"Error resetting database: {e}")
 
 @app.route('/')
 def index():
@@ -312,6 +336,25 @@ def profile():
     username = session['username']
     user = get_user(username)
     
+    # If user doesn't exist in database, create a default user object
+    if not user:
+        user = {
+            'id': None,
+            'username': username,
+            'email': '',
+            'bio': '',
+            'skills_teach': [],
+            'skills_learn': [],
+            'github_link': '',
+            'linkedin_link': '',
+            'website_link': '',
+            'sessions_taught': 0,
+            'sessions_attended': 0,
+            'total_rating': 0,
+            'rating_count': 0,
+            'average_rating': 0
+        }
+    
     if request.method == 'POST':
         # Handle profile updates
         bio = request.form.get('bio', '').strip()
@@ -340,8 +383,7 @@ def profile():
         else:
             flash('Error updating profile. Please try again.', 'error')
     
-    # Get updated user data
-    user = get_user(username)
+    # Get user data
     user_sessions = get_user_sessions(username)
     user_bookings = get_user_bookings(username)
     user_ratings = get_user_ratings(username)
