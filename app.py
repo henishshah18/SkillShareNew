@@ -22,36 +22,30 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-prod
 # Check if running on Vercel
 if os.environ.get('VERCEL_ENV'):
     # Use PostgreSQL on Vercel
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_URL', '')
+    DATABASE_URL = os.environ.get('POSTGRES_URL', '')
+    if not DATABASE_URL:
+        logging.error("No database URL provided in production!")
+    else:
+        logging.info("Using PostgreSQL database in production")
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 else:
     # Use SQLite for local development
+    logging.info("Using SQLite database in development")
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///skillshare.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+logging.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 # Initialize the database
 db.init_app(app)
 
-# Only create tables in development
-if not os.environ.get('VERCEL_ENV'):
-    with app.app_context():
-        db.create_all()
-
-def reset_database():
-    """Drop all tables and recreate them"""
-    with app.app_context():
-        logging.info("Dropping all database tables...")
-        db.drop_all()
-        logging.info("Creating all database tables...")
-        db.create_all()
-        logging.info("Database tables created successfully!")
-
-# Create all database tables
+# Create tables in development or if tables don't exist
 with app.app_context():
     try:
-        reset_database()
+        db.create_all()
+        logging.info("Database tables created successfully!")
     except Exception as e:
-        logging.error(f"Error resetting database: {e}")
+        logging.error(f"Error creating database tables: {e}")
 
 @app.route('/')
 def index():
@@ -78,22 +72,35 @@ def signup():
             flash('Password must be at least 6 characters long', 'error')
             return render_template('signup.html', username=username, email=email)
         
-        # Check if user already exists
-        existing_user = get_user(username)
-        if existing_user:
-            flash('Username already exists', 'error')
-            return render_template('signup.html', username=username, email=email)
-        
-        # Create new user
-        password_hash = generate_password_hash(password)
-        user_id = create_user(username, email, password_hash)
-        
-        if user_id:
-            session['user_id'] = user_id
-            session['username'] = username
-            flash('Account created successfully!', 'success')
-            return redirect(url_for('profile'))
-        else:
+        try:
+            # Check if user already exists
+            existing_user = get_user(username)
+            if existing_user:
+                flash('Username already exists', 'error')
+                return render_template('signup.html', username=username, email=email)
+            
+            # Create new user
+            password_hash = generate_password_hash(password)
+            
+            # Initialize database tables if they don't exist
+            with app.app_context():
+                db.create_all()
+                logging.info("Database tables created or verified")
+            
+            user_id = create_user(username, email, password_hash)
+            logging.info(f"Attempting to create user: {username}")
+            
+            if user_id:
+                session['user_id'] = user_id
+                session['username'] = username
+                flash('Account created successfully!', 'success')
+                return redirect(url_for('profile'))
+            else:
+                logging.error(f"Failed to create user: {username}")
+                flash('Error creating account. Please try again.', 'error')
+                return render_template('signup.html', username=username, email=email)
+        except Exception as e:
+            logging.error(f"Error during signup: {str(e)}")
             flash('Error creating account. Please try again.', 'error')
             return render_template('signup.html', username=username, email=email)
     
